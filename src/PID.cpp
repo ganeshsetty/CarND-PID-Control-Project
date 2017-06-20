@@ -28,14 +28,14 @@ void PID::Init(double Kp, double Ki, double Kd) {
 
     //Potential changes of params for twiddle
 	dp.push_back(0.1);
-    dp.push_back(0.001);
-    dp.push_back(1.05);
+        dp.push_back(0.001);
+        dp.push_back(1.05);
 
-    //     
-    params[0]= 'P';
-    params[1] = 'I';
-    params[2] = 'D';
-    params[3] = '\0';    
+            
+        params[0]= 'P';
+        params[1] = 'I';
+        params[2] = 'D';
+        params[3] = '\0';    
 	param_cnt = 0; 
 	
 	message_cnt = 0;
@@ -105,21 +105,21 @@ void PID::TwiddleTune(double tol) {
 		if(param_cnt ==3) param_cnt = 0;
 		//std::cout << "error sum: "<< err << " best_err: " << best_err << std::endl; 	
 		if(err < best_err && iteration_cnt > 200) {
-            std::cout << "Before 1st switch" << std::endl;
-            std::cout << "param : " << param << std::endl;
+                //std::cout << "Before 1st switch" << std::endl;
+                //std::cout << "param : " << param << std::endl;
 			best_err = err;
 		
 			switch(param) {
 				case 'P' :
-                    //std::cout << "1st switch inside param 'P'" << std::endl;
+                                //std::cout << "1st switch inside param 'P'" << std::endl;
 					dp[0] *= 1.1;
 					break;
 				case 'I' :
-                    //std::cout << "1st switch inside param I " << std::endl;
+                               //std::cout << "1st switch inside param I " << std::endl;
 					dp[1] *= 1.1;
 					break;
 				case 'D' :
-                    //std::cout << "1st switch inside param D " << std::endl;
+                               //std::cout << "1st switch inside param D " << std::endl;
 					dp[2] *= 1.1;
 					break;
 				default:
@@ -134,44 +134,44 @@ void PID::TwiddleTune(double tol) {
 			else {
 				switch(param) {
 				case 'P' :
-                    //std::cout << "2nd switch inside param P " << std::endl;
+                                        //std::cout << "2nd switch inside param P " << std::endl;
 					Kp += dp[0];
 					dp[0] *= 0.9;
 					break;
 				case 'I' :
-                    //std::cout << " 2nd switch inside param I " << std::endl;
+                                        //std::cout << " 2nd switch inside param I " << std::endl;
 					Ki += dp[1];
 					dp[1] *= 0.9;
 					break;
 				case 'D' :
-                    //std::cout << " 2nd switch inside param D" << std::endl;
+                                       //std::cout << " 2nd switch inside param D" << std::endl;
 					Kd += dp[2];
 					dp[2] *= 0.9;
 					break;
 				default:
-                    std::cout << "Invalid Param" << std::endl;
+                                        std::cout << "Invalid Param" << std::endl;
 				}
 				improved = 1;
 			}
 		}
 		switch(param) {
 			case 'P' :
-                //std::cout << "3rd switch Inside P" << std::endl;
+                                //std::cout << "3rd switch Inside P" << std::endl;
 				if(improved == 1) Kp += dp[0];
 				else Kp -= 2*dp[0];
 				break;
 			case 'I' :
-                //std::cout << "3rd switch Inside I" << std::endl;
+                                //std::cout << "3rd switch Inside I" << std::endl;
 				if(improved == 1) Ki += dp[1];
 				else Ki -= 2*dp[1];
 				break;
 			case 'D' :
-                  //std::cout << "3rd switch Inside D" << std::endl;
+                                //std::cout << "3rd switch Inside D" << std::endl;
 				if(improved == 1) Kd += dp[2];
 				else Kd -= 2*dp[2];
 				break;
 			default:
-                std::cout << "Invalid Param" << std::endl;
+                                std::cout << "Invalid Param" << std::endl;
 		}
 	}
 }
