@@ -1,3 +1,10 @@
+# PID control project
+
+The objective of this project is implementing a PID (Proportional-Integral-Derivative) controller to keep the car driving on a race track. The control input to car is steering value provided by PID output. The PID controller takes the error(difference between the desired and true state) called cross track error(cte) as input and its value, integral and derivative are multiplied by factors Kp,Ki and Kd called proportional ,Integral and derivative gains respectively. The P term  generates a control command -(Kp) x (cte) i.e proportional to 'cte' to reduce the error. The Kp value of 0.25 is wisely choosen as per sebastian lecture and the car's behaviour is shown in below video link.
+
+
+# Setup of enviorenment
+
 # CarND-Controls-PID
 Self-Driving Car Engineer Nanodegree Program
 
