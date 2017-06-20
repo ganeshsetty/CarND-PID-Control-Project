@@ -4,6 +4,7 @@
 #include "PID.h"
 #include <math.h>
 
+#define N 100
 // for convenience
 using json = nlohmann::json;
 
@@ -32,13 +33,22 @@ int main()
 {
   uWS::Hub h;
 
-  PID pid;
+  PID steerPID;
   // TODO: Initialize the pid variable.
+  // choosen initial values
+  double Kp = 0.25;
+  double Ki = 0.0005;
+  double Kd = 4.5;
+  
+  steerPID.Init(Kp,Ki,Kd);
+  std::cout << "Kp" << steerPID.Kp << std::endl;
 
-  h.onMessage([&pid](uWS::WebSocket<uWS::SERVER> ws, char *data, size_t length, uWS::OpCode opCode) {
+
+  h.onMessage([&steerPID](uWS::WebSocket<uWS::SERVER> ws, char *data, size_t length, uWS::OpCode opCode) {
     // "42" at the start of the message means there's a websocket message event.
     // The 4 signifies a websocket message
     // The 2 signifies a websocket event
+    steerPID.message_cnt++;
     if (length && length > 2 && data[0] == '4' && data[1] == '2')
     {
       auto s = hasData(std::string(data).substr(0, length));
@@ -57,13 +67,29 @@ int main()
           * NOTE: Feel free to play around with the throttle and speed. Maybe use
           * another PID controller to control the speed!
           */
+		  if (!steerPID.twiddle_tuned) {
+                // std::cout << "tuned: " << steerPID.twiddle_tuned << std::endl;
+				steerPID.TwiddleRun(cte);
+				steer_value = steerPID.getSteerValue();
+				//Tolerance is choosen 0.01 enabling more iterations for converging of params Kp,Ki,Kd to
+				//optimal values
+				if(steerPID.message_cnt > 2*N*2) steerPID.TwiddleTune(0.01);
+			}	
+			else 
+			{ //Already tuned using twiddle
+				steerPID.message_cnt = 0;
+				steerPID.UpdateError(cte);
+				steer_value = steerPID.TotalError();
+			}
           
           // DEBUG
-          std::cout << "CTE: " << cte << " Steering Value: " << steer_value << std::endl;
+          std::cout << "CTE: " << cte << " Steering Value: " << steer_value << " sum_dp : " << steerPID.sum_dp << " msg_cnt : " 
+		                       << steerPID.message_cnt << " Kp : " << steerPID.Kp << " Ki : " 
+							   << steerPID.Ki << " Kd : " << steerPID.Kd << std::endl;
 
           json msgJson;
           msgJson["steering_angle"] = steer_value;
-          msgJson["throttle"] = 0.3;
+          msgJson["throttle"] =0.2 + (1.0-fabs(steer_value))* 0.2;
           auto msg = "42[\"steer\"," + msgJson.dump() + "]";
           std::cout << msg << std::endl;
           ws.send(msg.data(), msg.length(), uWS::OpCode::TEXT);
@@ -112,3 +138,4 @@ int main()
   }
   h.run();
 }
+
